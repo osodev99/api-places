@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -10,8 +10,16 @@ export class UsersService {
 
   constructor(@InjectRepository(User) private readonly repository: Repository<User>) { }
 
-  create(createUserDto: CreateUserDto) {
-    return `User service dto, ${JSON.stringify(createUserDto)}`;
+  async create(createUserDto: CreateUserDto) {
+    const existing = await this.repository.findBy({ email: ILike(createUserDto.email.trim()) });
+
+    if (existing.length !== 0) {
+      throw new ConflictException();
+    }
+
+    await this.repository.insert(createUserDto);
+
+    return createUserDto;
   }
 
   findAll() {
@@ -29,11 +37,31 @@ export class UsersService {
     return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const user = await this.repository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    if (!user.enable) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    await this.repository.update(id, updateUserDto);
+
+    return { message: 'Actualizado correcto' };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    const user = await this.repository.findOneBy({ id });
+
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    await this.repository.update(id, { enable: false });
+
+    return { message: 'Actualizado correcto' };
   }
 }

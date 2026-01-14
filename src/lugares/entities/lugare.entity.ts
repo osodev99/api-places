@@ -2,6 +2,7 @@ import { Categoria } from "src/categorias/entities/categoria.entity";
 import { User } from "../../users/entities/user.entity";
 import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Calificacion } from "src/calificaciones/entities/calificacione.entity";
+import { Double } from "typeorm/browser";
 
 @Entity()
 export class Lugar {
@@ -14,10 +15,10 @@ export class Lugar {
     @Column()
     url_imagen: string;
 
-    @Column()
+    @Column({ type: 'real' })
     latitud: number;
 
-    @Column()
+    @Column({ type: 'real' })
     longitud: number;
 
     @Column()

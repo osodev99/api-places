@@ -17,7 +17,7 @@ export class User {
     @Column()
     password: string;
 
-    @Column()
+    @Column({ default: true })
     enable: boolean;
 
     @OneToMany(() => Lugar, (lugar) => lugar.usuario)
