@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { CreateAuthDto } from './dto/create-auth.dto';
@@ -20,13 +20,13 @@ export class AuthService {
             full_name: loginDto.password,
         }
 
-        const isEmailExist = await this.userRepository.findOneBy({ email: loginDto.email });
+        const user = await this.userRepository.findOneBy({ email: loginDto.email });
 
-        if (isEmailExist) {
+        if (user && user.enable) {
             const token = this.jwtService.sign(payload, { secret: process.env.JWT_SECRET });
 
             return {
-                full_name: payload.full_name,
+                full_name: user.full_name,
                 token: token
             };
 
@@ -36,22 +36,19 @@ export class AuthService {
 
     }
 
-    registerAccount(createDto: CreateAuthDto, req: any) {
-        console.log(createDto);
-        console.log(req);
+    async registerAccount(createDto: CreateAuthDto) {
+        const isEmailExist = await this.userRepository.findOneBy({ email: createDto.email });
 
-        // const payload = {
-        //     email: loginDto.email,
-        //     full_name: 'Juan Flores',
-        // }
-
-        // const token = this.jwtService.sign(payload, { secret: process.env.JWT_SECRET });
-
-        return {};
-        // return {
-        //     full_name: payload.full_name,
-        //     token: token
-        // };
+        if (isEmailExist) {
+            throw new ConflictException();
+        } else {
+            const user: Partial<User> = {
+                full_name: createDto.username,
+                email: createDto.email,
+                password: createDto.password,
+            }
+            return await this.userRepository.save(user);
+        }
     }
 
 }
