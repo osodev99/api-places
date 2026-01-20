@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNumber, IsString, IsUrl, Min } from 'class-validator';
+import { IsInt, IsNumber, IsString, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateLugareDto {
 	@ApiProperty()
@@ -7,14 +8,12 @@ export class CreateLugareDto {
 	nombre: string;
 
 	@ApiProperty()
-	@IsUrl()
-	url_imagen: string;
-
-	@ApiProperty()
+	@Transform(({ value }) => parseFloat(value))
 	@IsNumber()
 	latitud: number;
 
 	@ApiProperty()
+	@Transform(({ value }) => parseFloat(value))
 	@IsNumber()
 	longitud: number;
 
@@ -23,12 +22,12 @@ export class CreateLugareDto {
 	descripcion: string;
 
 	@ApiProperty()
+	@Transform(({ value }) => parseInt(value, 10))
 	@IsInt()
-	@Min(1)
 	usuarioId: number;
 
 	@ApiProperty()
+	@Transform(({ value }) => parseInt(value, 10))
 	@IsInt()
-	@Min(1)
 	categoriaId: number;
 }

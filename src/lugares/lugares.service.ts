@@ -12,7 +12,7 @@ export class LugaresService {
     private readonly repository: Repository<Lugar>,
   ) { }
 
-  async create(createLugareDto: CreateLugareDto) {
+  async create(createLugareDto: CreateLugareDto, file?: Express.Multer.File) {
     const existing = await this.repository.findBy({ nombre: ILike(createLugareDto.nombre.trim()) });
 
     if (existing.length !== 0) {
@@ -21,7 +21,7 @@ export class LugaresService {
 
     const toInsert: Partial<Lugar> = {
       nombre: createLugareDto.nombre,
-      url_imagen: createLugareDto.url_imagen,
+      imagen_filename: file?.filename,
       latitud: createLugareDto.latitud,
       longitud: createLugareDto.longitud,
       descripcion: createLugareDto.descripcion,
@@ -46,7 +46,7 @@ export class LugaresService {
     return lugar;
   }
 
-  async update(id: number, updateLugareDto: UpdateLugareDto) {
+  async update(id: number, updateLugareDto: UpdateLugareDto, file?: Express.Multer.File) {
     const lugar = await this.repository.findOneBy({ id });
 
     if (!lugar) {
@@ -58,6 +58,9 @@ export class LugaresService {
     }
 
     const toUpdate: Partial<Lugar> = { ...updateLugareDto } as any;
+    if (file) {
+      toUpdate.imagen_filename = file.filename;
+    }
     if (updateLugareDto.usuarioId !== undefined) {
       (toUpdate as any).usuario = { id: updateLugareDto.usuarioId } as any;
     }

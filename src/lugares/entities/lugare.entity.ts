@@ -12,8 +12,8 @@ export class Lugar {
     @Column()
     nombre: string;
 
-    @Column()
-    url_imagen: string;
+    @Column({ nullable: true })
+    imagen_filename: string;
 
     @Column({ type: 'real' })
     latitud: number;
